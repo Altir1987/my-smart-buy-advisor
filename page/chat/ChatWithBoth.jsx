@@ -1,21 +1,20 @@
-'use client'
-import { useState , useEffect} from 'react';
+'use client';
+import { useState, useEffect } from 'react';
 import Spinner from '@/components/spinner/Spinner';
 import { useSearchParams } from 'next/navigation';
+import styles from './ChatPage.module.css';      // ⬅️ главное нововведение
 
 export default function ChatPage() {
-    const [input, setInput] = useState('');
-    const [chat, setChat] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [sessionId, setSessionId] = useState(null);
-    const searchParams = useSearchParams();
+    const [input, setInput]           = useState('');
+    const [chat, setChat]             = useState([]);
+    const [loading, setLoading]       = useState(false);
+    const [sessionId, setSessionId]   = useState(null);
+    const searchParams                = useSearchParams();
     useEffect(() => {
         const resumeSessionId = searchParams.get('resume');
 
         if (resumeSessionId) {
             setSessionId(resumeSessionId);
-
-            // ⬇️ подгружаем историю сообщений
             fetch(`/api/session-messages?sessionId=${resumeSessionId}`)
                 .then(res => res.json())
                 .then(data => setChat(data.messages || []))
@@ -37,62 +36,58 @@ export default function ChatPage() {
             }
         };
     }, [searchParams]);
-
-
     const sendMessage = async () => {
-        if (!input.trim()) {
-            alert('write something!');
-            return;
-        }
+        if (!input.trim()) return alert('Напишите что-нибудь 😊');
+
         const userMessage = { role: 'user', content: input };
-        const newChat = [...chat, userMessage];
+        const newChat     = [...chat, userMessage];
         setChat(newChat);
         setInput('');
         setLoading(true);
+
         try {
             const cleanMessages = newChat.map(({ role, content }) => ({ role, content }));
-            const res = await fetch('/api/ask-mistral', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json',},
-                body: JSON.stringify({ messages: cleanMessages ,sessionId}),
+            const res  = await fetch('/api/ask-mistral', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ messages: cleanMessages, sessionId }),
             });
-
             const data = await res.json();
             const assistantMessage = data.choices?.[0]?.message;
-            if (assistantMessage) {
-                setChat([...newChat, assistantMessage]);
-            }
-        } catch (error) {
-            console.error(error);
+            if (assistantMessage) setChat([...newChat, assistantMessage]);
+        } catch (err) {
+            console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div style={{ maxWidth: 600, margin: '0 auto', padding: 20 }}>
-            <div style={{ marginBottom: 20 }}>
+        <div className={styles.chatPage}>
+            <h1 className={styles.header}>How may I assist you?</h1>
+
+            <div className={styles.messages}>
                 {chat.map((msg, idx) => (
-                    <div key={idx} style={{ margin: '10px 0' }}>
-                        <strong>{msg.role}:</strong> {msg.content}
+                    <div
+                        key={idx}
+                        className={`${styles.bubble} ${msg.role === 'user' ? styles.user : styles.assistant}`}
+                    >
+                        {msg.content}
                     </div>
                 ))}
-                {loading && (
-                        <Spinner message="thinking..." />
-                )
-                }
+                {loading && <Spinner message="thinking…" />}
             </div>
 
-            <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="write, what you want in your lap top..."
-                style={{ width: '100%', padding: 10, marginBottom: 10 }}
-            />
-
-            <button onClick={sendMessage} style={{ padding: '10px 20px' }}>
-                Отправить
-            </button>
+            <div className={styles.inputArea}>
+                <input
+                    className={styles.inputField}
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    placeholder="Feel free to ask anything"
+                    onKeyDown={e => { if (e.key === 'Enter') sendMessage(); }}
+                />
+                <button className={styles.iconBtn} onClick={sendMessage}>➤</button>
+            </div>
         </div>
     );
 }
