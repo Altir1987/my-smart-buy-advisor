@@ -8,7 +8,7 @@ export async function middleware(req) {
 
     const url = req.nextUrl.clone();
 
-    const publicPaths = ['/login', '/api/auth/login', '/api/auth/register', '/'];
+    const publicPaths = ['/login'];
 
     const isPublic = publicPaths.some((path) => url.pathname.startsWith(path));
 

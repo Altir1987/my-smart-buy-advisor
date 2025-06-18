@@ -3,29 +3,16 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styles from 'app/layouts/SideBarLayout.module.css'
-import { useState , useEffect} from 'react';
 import IconSvgChat from '/components/Icons/IconSvgChat'
 import IconSvgHistory from "@/components/Icons/IconSvgHistory";
 import IconSvgUsers from "@/components/Icons/IconSvgUsers";
 import IconSvgLogout from "@/components/Icons/IconSvgLogout";
+import { useUser } from "/app/context/UseContext"
 
 
 export default function SidebarLayout({ children }) {
     const pathname = usePathname();
-    const [user, setUser] = useState(null);
-    useEffect(() => {
-        async function fetchUser() {
-            const res = await fetch('/api/auth/currentUser');
-            if (res.ok) {
-                const data = await res.json();
-                setUser(data.user);
-            } else {
-                setUser(null);
-            }
-        }
-
-        fetchUser();
-    }, []);
+    const { user } = useUser();
     const handleLogout = async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
         window.location.href = '/login';

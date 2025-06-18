@@ -1,10 +1,10 @@
-
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './auth.module.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useUser } from "/app/context/UseContext";
 
 export default function AuthPage() {
     const [isLogin, setIsLogin] = useState(true);
@@ -14,6 +14,7 @@ export default function AuthPage() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
+    const { setUser } = useUser();
 
 
     const handleSubmit = async (e) => {
@@ -27,6 +28,7 @@ export default function AuthPage() {
             const data = await res.json();
 
             if (res.ok) {
+                setUser(data.user);
                 router.push('/chat');
             } else {
                 alert(data.message);

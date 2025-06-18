@@ -2,13 +2,14 @@ import { useEffect, useState} from 'react';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import styles from './history.module.css';
-import {AuthContext} from '/components/AuthGuard';
+import { useUser } from "/app/context/UseContext"
 
 export default function History() {
    const [sessions, setSessions] = useState([]);
    const [error, setError] = useState('');
    const [modalSession, setModalSession] = useState(null);
    const router = useRouter();
+   const { user } = useUser();
    useEffect(() => {
       async function fetchHistory() {
          const res = await fetch('/api/history');
@@ -57,9 +58,11 @@ export default function History() {
                     <div
                         className={styles.shortPreview}
                     >
-                       <strong className={styles.name}>
-                          You
-                       </strong>
+                       {user && (
+                           <strong className={styles.name}>
+                              {user.name}
+                           </strong>
+                       )}
                        <span className={styles.content}>
                         {firstUserMsg ? firstUserMsg.content : 'message empty'}
                      </span>
@@ -76,7 +79,7 @@ export default function History() {
                        {modalSession.messages.map((msg, i) => (
                            <div key={i} className={styles.modalMsgItem}>
                               <div className={styles.modalMsgName}>
-                                 {msg.role === 'user' ? 'You' : 'Assistant'}:
+                                 {msg.role === 'user' ? user.name : 'Assistant'}:
                               </div>
                               <div className={styles.modalMsgText}>{msg.content}</div>
                            </div>
