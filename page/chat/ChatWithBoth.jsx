@@ -64,8 +64,7 @@ export default function ChatPage() {
 
     return (
         <div className={styles.chatPage}>
-            <h1 className={styles.header}>How may I assist you?</h1>
-
+            {chat.length === 0 && <h1 className={styles.header}>How may I assist you?</h1>}
             <div className={styles.messages}>
                 {chat.map((msg, idx) => (
                     <div

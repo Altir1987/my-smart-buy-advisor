@@ -6,9 +6,12 @@
 }
 .header {
     text-align: center;
-    font-size: 32px;
-    font-weight: 600;
     margin-bottom: 48px;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    font-size: 36px;
+    line-height: 145%;
+    color: #4785F0;
 }
 .messages {
     display: flex;
@@ -18,19 +21,23 @@
 }
 .bubble {
     max-width: 85%;
+    font-family: 'Open Sans', sans-serif;
+    margin: 8px 0;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 140%;
     padding: 14px 18px;
     border-radius: 18px;
-    line-height: 1.4;
     box-shadow: 0 2px 6px rgba(0,0,0,.05); }
 .user {
     align-self: flex-end;
-    background: #2f80ed;
+    background: #5fa0e4;
     color: #fff;
     border-bottom-right-radius: 4px;
 }
 .assistant {
     align-self: flex-start;
-    background: #f4f6f8;
+    background: #DCEDFF;
     color: #202124;
     border-bottom-left-radius: 4px;
 }
@@ -55,14 +62,16 @@
     width: 34px;
     height: 34px;
     border: none;
-    background: #2f80ed;
+    background: #4785F0;
     color: #fff;
     border-radius: 50%;
     display: grid;
     place-items: center;
     cursor: pointer;
 }
-.iconBtn:active  { transform: scale(.95); }
+.iconBtn:active  {
+    transform: scale(.95);
+}
 .toolsWrap  {
     display: flex;
     align-items: center;

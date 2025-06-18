@@ -1,12 +1,14 @@
-'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState} from 'react';
 import { useRouter } from 'next/navigation';
+import { formatDistanceToNow } from 'date-fns';
+import styles from './history.module.css';
+import {AuthContext} from '/components/AuthGuard';
 
 export default function History() {
    const [sessions, setSessions] = useState([]);
    const [error, setError] = useState('');
+   const [modalSession, setModalSession] = useState(null);
    const router = useRouter();
-
    useEffect(() => {
       async function fetchHistory() {
          const res = await fetch('/api/history');
@@ -17,11 +19,11 @@ export default function History() {
             setError('Unauthorized');
          }
       }
-
       fetchHistory();
    }, []);
+
    const deleteSession = async (sessionId) => {
-      const confirmed = confirm('delete session?');
+      const confirmed = confirm('Delete session?');
       if (confirmed) {
          const res = await fetch('/api/delete-session', {
             method: 'POST',
@@ -31,50 +33,75 @@ export default function History() {
 
          if (res.ok) {
             setSessions(prev => prev.filter(s => s.session_id !== sessionId));
+            setModalSession(null);
          } else {
-            alert('Something went wrong');
+            alert('Something went wrong!');
          }
       }
    };
 
    return (
-       <div style={{ maxWidth: 800, margin: '0 auto', padding: '2rem' }}>
-          <h1>{sessions.length === 0 ? 'Empty History' : 'Message History'}</h1>
+       <div className={styles.wrapper}>
+          <h1 className={styles.title}>{sessions.length === 0 ? 'History Empty' : 'History Message'}</h1>
           {error && <p style={{ color: 'red' }}>{error}</p>}
 
-          {sessions.map((session, index) => (
-              <div key={index} style={{ marginBottom: '2rem', padding: '1rem', border: '1px solid #ccc', borderRadius: 8 }}>
-                 <h3>Сессия #{session.session_id}</h3>
-                 <small>🕒 {new Date(session.started_at).toLocaleString()}</small>
-                 <div style={{ marginTop: '1rem' }}>
-                    {session.messages.map((msg, i) => (
-                        <div
-                            key={i}
-                            style={{
-                               background: msg.role === 'user' ? '#f0f8ff' : '#e6ffe6',
-                               padding: '10px',
-                               borderRadius: '6px',
-                               marginBottom: '0.5rem'
-                            }}
-                        >
-                           <strong>{msg.role === 'user' ? 'You' : 'Assistant'}:</strong>
-                           <p>{msg.content}</p>
-                           <small>{new Date(msg.created_at).toLocaleString()}</small>
-                        </div>
-                    ))}
+          {sessions.map((session) => {
+             const firstUserMsg = session.messages.find(msg => msg.role === 'user');
+             return (
+                 <div onClick={() => setModalSession(session)}
+                      key={session.session_id}
+                      className={styles.messageWrapper}>
+                    <div className={styles.date}>
+                       {formatDistanceToNow(new Date(session.started_at), { addSuffix: true })}
+                    </div>
+                    <div
+                        className={styles.shortPreview}
+                    >
+                       <strong className={styles.name}>
+                          You
+                       </strong>
+                       <span className={styles.content}>
+                        {firstUserMsg ? firstUserMsg.content : 'message empty'}
+                     </span>
+                    </div>
                  </div>
-                 <button
-                     onClick={() => router.push(`/chat?resume=${session.session_id}`)}
-                     style={{ marginTop: 10 }}
-                 >
-                    Продолжить
-                 </button>
-                 <button onClick={() => deleteSession(session.session_id)} style={{ marginTop: 10 }}>
-                    Удалить
-                 </button>
-              </div>
+             )
+          })}
 
-          ))}
+          {modalSession && (
+              <div className={styles.modalBackdrop} onClick={() => setModalSession(null)}>
+                 <div className={styles.modalWindow} onClick={e => e.stopPropagation()}>
+                    <div className={styles.modalTitle}>Full History</div>
+                    <div className={styles.modalMessages}>
+                       {modalSession.messages.map((msg, i) => (
+                           <div key={i} className={styles.modalMsgItem}>
+                              <div className={styles.modalMsgName}>
+                                 {msg.role === 'user' ? 'You' : 'Assistant'}:
+                              </div>
+                              <div className={styles.modalMsgText}>{msg.content}</div>
+                           </div>
+                       ))}
+                    </div>
+                    <div className={styles.modalActions}>
+                       <button
+                           onClick={() => {
+                              setModalSession(null);
+                              router.push(`/chat?resume=${modalSession.session_id}`);
+                           }}>
+                          Продолжить
+                       </button>
+                       <button
+                           onClick={() => deleteSession(modalSession.session_id)}>
+                          Удалить
+                       </button>
+                       <button
+                           onClick={() => setModalSession(null)}>
+                          Закрыть
+                       </button>
+                    </div>
+                 </div>
+              </div>
+          )}
        </div>
    );
 }

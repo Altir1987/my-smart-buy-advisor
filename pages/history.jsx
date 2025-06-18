@@ -4,10 +4,11 @@ import AuthGuard from "@/components/AuthGuard";
 
 export default function ChatPage() {
     return (
-   <AuthGuard>
-       <SidebarLayout>
-           <History />
+        <SidebarLayout>
+           <AuthGuard>
+               <History />
+           </AuthGuard>
        </SidebarLayout>
-   </AuthGuard>
+
     );
 }
