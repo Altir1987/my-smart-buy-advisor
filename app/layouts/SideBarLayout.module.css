@@ -2,77 +2,184 @@
     display: flex;
     flex-direction: row;
     min-height: 100vh;
+    font-family: 'Open Sans', sans-serif;
 }
 
 .sidebar {
     width: 200px;
     background: #F5F9FF;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
+}
 
+.nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 44px;
+    height: 100%;
+}
+
+.linkWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
 }
 
 .link {
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 600;
-    font-size: 20px;
-    line-height: 145%;
-    letter-spacing: 1px;
-
-    text-decoration: none;
-    color: #333;
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 15px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.link:hover,
+.link.active {
+    color: #4785F0;
 }
 
 .link.active {
-    color: #4785F0;
-    font-family: 'Open Sans', sans-serif;
     font-weight: 700;
-    font-size: 20px;
-    line-height: 145%;
-    letter-spacing: 1px;
-
 }
 
-.main {
-    flex-grow: 1;
-    padding: 20px;
-}
 .userPanel {
-    margin-top: 2rem;
-    padding-top: 1rem;
+    margin-top: auto;
+    width: 100%;
     border-top: 1px solid #ccc;
+    padding: 16px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
 }
 
 .username {
-    margin: 0 0 0.5rem;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 600;
     font-size: 20px;
-    line-height: 145%;
-    letter-spacing: 1px;
-
+    font-weight: 600;
 }
 
 .logoutButton {
-    cursor: pointer;
-    border-radius: 1px;
     border: none;
     background: none;
     display: flex;
     align-items: center;
     gap: 8px;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 600;
     font-size: 20px;
-    line-height: 145%;
-    letter-spacing: 1px;
     color: #F48625;
-    padding: unset;
+    cursor: pointer;
+}
+.userPanelMobile {
+    display: none;
+    width: 100%;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
 }
 
+.menuToggle {
+    border: none;
+    background: none;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+}
+.menuContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    width: 100%;
+}
+.main {
+    flex-grow: 1;
+    padding: 20px;
+}
+.mobileLogOut{
+    display: none;
+}
+
+
+
+@media (max-width: 780px) {
+
+    .wrapper {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .userPanelMobile {
+        display: flex;
+    }
+    .userPanel {
+        display: none;
+    }
+    .nav {
+        position: relative;
+        padding: 0;
+        gap: 0;
+    }
+    .mobileLogOut {
+        display: flex;
+    }
+    .menuContent {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        height: fit-content;
+        background: #F5F9FF;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        z-index: 999;
+        transform: scaleY(0);
+        transform-origin: top;
+        transition: transform 0.25s ease;
+    }
+    .menuContent.open {
+        transform: scaleY(1);
+    }
+
+    .linkWrapper,
+    .logoutButton {
+        display: none;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+    }
+
+    .menuContent.open .linkWrapper,
+    .menuContent.open .logoutButton {
+        display: flex;
+        opacity: 1;
+    }
+    .linkWrapper {
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px 0;
+        align-items: center;
+        width: 100%;
+    }
+
+    .link {
+        font-size: 16px;
+    }
+
+    .logoutButton {
+        font-size: 16px;
+        padding: 16px 0 24px;
+    }
+    .main {
+        padding: 16px;
+    }
+}
