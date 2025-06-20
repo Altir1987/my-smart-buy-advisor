@@ -10,6 +10,36 @@ export default function ChatPage() {
     const [loading, setLoading]       = useState(false);
     const [sessionId, setSessionId]   = useState(null);
     const searchParams                = useSearchParams();
+    const renderWithLinks = (text) => {
+        const urlRegex = /<?(https?:\/\/[^\s<>\"]+)>?/g;
+        const parts = [];
+        let lastIndex = 0;
+        let match;
+
+        while ((match = urlRegex.exec(text)) !== null) {
+            if (match.index > lastIndex) {
+                parts.push(text.substring(lastIndex, match.index));
+            }
+            const url = match[1];
+            parts.push(
+                <a
+                    key={url + match.index}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.link}
+                >
+                    {url}
+                </a>
+            );
+            lastIndex = match.index + match[0].length;
+        }
+        if (lastIndex < text.length) {
+            parts.push(text.substring(lastIndex));
+        }
+        return parts;
+    }
+
     useEffect(() => {
         const resumeSessionId = searchParams.get('resume');
 
@@ -71,7 +101,7 @@ export default function ChatPage() {
                         key={idx}
                         className={`${styles.bubble} ${msg.role === 'user' ? styles.user : styles.assistant}`}
                     >
-                        {msg.content}
+                        {renderWithLinks(msg.content)}
                     </div>
                 ))}
                 {loading && <Spinner message="thinking…" />}

@@ -84,6 +84,12 @@
     font-size: 20px;
     line-height: 1;
 }
+.link{
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #4785F0;
+}
 
 @media (max-width: 480px) {
     .chatPage      { padding: 24px 12px; }

@@ -29,7 +29,7 @@ export default function AuthPage() {
 
             if (res.ok) {
                 setUser(data.user);
-                router.push('/chat');
+                window.location.href = '/chat';
             } else {
                 alert(data.message);
             }

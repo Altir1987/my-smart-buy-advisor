@@ -37,7 +37,7 @@ export default function SidebarLayout({ children }) {
                         <IconSvgHistory color={pathname === '/history' ? '#4785F0' : 'black'}/>
                         History
                     </Link>
-                    {user?.is_admin && (
+                    {user?.is_admin === 1 && (
                         <Link
                             href="/users"
                             className={`${styles.link} ${pathname === '/users' ? styles.active : ''}`}

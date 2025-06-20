@@ -3,13 +3,44 @@ import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import styles from './history.module.css';
 import { useUser } from "/app/context/UseContext"
+import IconSvgClose from "components/Icons/IconSvgClose"
 
 export default function History() {
    const [sessions, setSessions] = useState([]);
    const [error, setError] = useState('');
    const [modalSession, setModalSession] = useState(null);
+   const [confirmDeleteSessionId, setConfirmDeleteSessionId] = useState(null);
    const router = useRouter();
    const { user } = useUser();
+   const renderWithLinks = (text) => {
+      const urlRegex = /<?(https?:\/\/[^\s<>\"]+)>?/g;
+      const parts = [];
+      let lastIndex = 0;
+      let match;
+
+      while ((match = urlRegex.exec(text)) !== null) {
+         if (match.index > lastIndex) {
+            parts.push(text.substring(lastIndex, match.index));
+         }
+         const url = match[1];
+         parts.push(
+             <a
+                 key={url + match.index}
+                 href={url}
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 className={styles.link}
+             >
+                {url}
+             </a>
+         );
+         lastIndex = match.index + match[0].length;
+      }
+      if (lastIndex < text.length) {
+         parts.push(text.substring(lastIndex));
+      }
+      return parts;
+   }
    useEffect(() => {
       async function fetchHistory() {
          const res = await fetch('/api/history');
@@ -22,23 +53,20 @@ export default function History() {
       }
       fetchHistory();
    }, []);
-
-   const deleteSession = async (sessionId) => {
-      const confirmed = confirm('Delete session?');
-      if (confirmed) {
-         const res = await fetch('/api/delete-session', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId }),
-         });
-
-         if (res.ok) {
-            setSessions(prev => prev.filter(s => s.session_id !== sessionId));
-            setModalSession(null);
-         } else {
-            alert('Something went wrong!');
-         }
+   const confirmDeleteSession = async () => {
+      if (!confirmDeleteSessionId) return;
+      const res = await fetch('/api/delete-session', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ sessionId: confirmDeleteSessionId }),
+      });
+      if (res.ok) {
+         setSessions(prev => prev.filter(s => s.session_id !== confirmDeleteSessionId));
+         setModalSession(null);
+      } else {
+         alert('Something went wrong!');
       }
+      setConfirmDeleteSessionId(null);
    };
 
    return (
@@ -70,10 +98,12 @@ export default function History() {
                  </div>
              )
           })}
-
           {modalSession && (
               <div className={styles.modalBackdrop} onClick={() => setModalSession(null)}>
                  <div className={styles.modalWindow} onClick={e => e.stopPropagation()}>
+                    <button className={styles.closeButton} type={"button"} onClick={() => setModalSession(null)}>
+                       <IconSvgClose color='#4785F0'/>
+                    </button>
                     <div className={styles.modalTitle}>Full History</div>
                     <div className={styles.modalMessages}>
                        {modalSession.messages.map((msg, i) => (
@@ -81,7 +111,7 @@ export default function History() {
                               <div className={styles.modalMsgName}>
                                  {msg.role === 'user' ? user.name : 'Assistant'}:
                               </div>
-                              <div className={styles.modalMsgText}>{msg.content}</div>
+                              <div className={styles.modalMsgText}>{renderWithLinks(msg.content)}</div>
                            </div>
                        ))}
                     </div>
@@ -91,17 +121,24 @@ export default function History() {
                               setModalSession(null);
                               router.push(`/chat?resume=${modalSession.session_id}`);
                            }}>
-                          Продолжить
+                          Continue
                        </button>
                        <button
-                           onClick={() => deleteSession(modalSession.session_id)}>
-                          Удалить
-                       </button>
-                       <button
-                           onClick={() => setModalSession(null)}>
-                          Закрыть
+                           onClick={() => setConfirmDeleteSessionId(modalSession.session_id)}>
+                          Delete
                        </button>
                     </div>
+                    {confirmDeleteSessionId && (
+                        <div className={styles.modalBackdrop} onClick={() => setConfirmDeleteSessionId(null)}>
+                           <div className={styles.confirmModal} onClick={e => e.stopPropagation()}>
+                              <div className={styles.confirmTitle}>Delete session?</div>
+                              <div className={styles.confirmActions}>
+                                 <button onClick={confirmDeleteSession}>Yes, delete</button>
+                                 <button onClick={() => setConfirmDeleteSessionId(null)}>Cancel</button>
+                              </div>
+                           </div>
+                        </div>
+                    )}
                  </div>
               </div>
           )}

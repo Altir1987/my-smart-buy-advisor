@@ -22,7 +22,6 @@ export async function middleware(req) {
             await jwtVerify(token, secret);
             return NextResponse.next();
         } catch (err) {
-            console.log('JWT verification failed:', err);
             url.pathname = '/login';
             return NextResponse.redirect(url);
         }
