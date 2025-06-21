@@ -150,6 +150,10 @@
     .menuContent.open {
         transform: scaleY(1);
     }
+    .linkContainer{
+        display: flex;
+        width: 80px;
+    }
 
     .linkWrapper,
     .logoutButton {

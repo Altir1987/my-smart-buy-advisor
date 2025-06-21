@@ -41,42 +41,47 @@ export default function SidebarLayout({ children }) {
                         }`}
                     >
                         <div className={styles.linkWrapper}>
-                            <Link
-                                href="/chat"
-                                className={`${styles.link} ${
-                                    pathname === '/chat' ? styles.active : ''
-                                }`}
-                            >
-                                <IconSvgChat
-                                    color={pathname === '/chat' ? '#4785F0' : 'black'}
-                                />
-                                <span>Chat</span>
-                            </Link>
-
-                            <Link
-                                href="/history"
-                                className={`${styles.link} ${
-                                    pathname === '/history' ? styles.active : ''
-                                }`}
-                            >
-                                <IconSvgHistory
-                                    color={pathname === '/history' ? '#4785F0' : 'black'}
-                                />
-                                <span>History</span>
-                            </Link>
-
-                            {user?.is_admin === 1 && (
+                            <div className={styles.linkContainer}>
                                 <Link
-                                    href="/users"
+                                    href="/chat"
                                     className={`${styles.link} ${
-                                        pathname === '/users' ? styles.active : ''
+                                        pathname === '/chat' ? styles.active : ''
                                     }`}
                                 >
-                                    <IconSvgUsers
-                                        color={pathname === '/users' ? '#4785F0' : 'black'}
+                                    <IconSvgChat
+                                        color={pathname === '/chat' ? '#4785F0' : 'black'}
                                     />
-                                    <span>Users</span>
+                                    <span>Chat</span>
                                 </Link>
+                            </div>
+                            <div className={styles.linkContainer}>
+                                <Link
+                                    href="/history"
+                                    className={`${styles.link} ${
+                                        pathname === '/history' ? styles.active : ''
+                                    }`}
+                                >
+                                    <IconSvgHistory
+                                        color={pathname === '/history' ? '#4785F0' : 'black'}
+                                    />
+                                    <span>History</span>
+                                </Link>
+                            </div>
+                                {user?.is_admin === 1 && (
+                                    <div className={styles.linkContainer}>
+                                        <Link
+                                        href="/users"
+                                        className={`${styles.link} ${
+                                            pathname === '/users' ? styles.active : ''
+                                        }`}
+                                    >
+                                        <IconSvgUsers
+                                            color={pathname === '/users' ? '#4785F0' : 'black'}
+                                        />
+                                        <span>Users</span>
+                                    </Link>
+                                    </div>
+
                             )}
                         </div>
                         <div className={styles.mobileLogOut}>

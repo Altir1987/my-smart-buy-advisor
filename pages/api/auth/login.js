@@ -19,12 +19,10 @@ export default async function handler(req, res) {
         }
 
         const token = jwt.sign(
-            { id: user.id, email: user.email, name: user.name, is_admin: user.is_admin },
+            { id: user.id, email: user.email, name: user.name, is_admin: user.is_admin, secondName: user.secondName },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
-
-        // ✅ Устанавливаем HttpOnly cookie
         res.setHeader('Set-Cookie', cookie.serialize('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',

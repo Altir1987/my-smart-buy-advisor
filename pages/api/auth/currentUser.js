@@ -9,7 +9,7 @@ export default function handler(req, res) {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        return res.status(200).json({ user: { name: decoded.name, email: decoded.email , is_admin: decoded.is_admin} });
+        return res.status(200).json({ user: { name: decoded.name, email: decoded.email , is_admin: decoded.is_admin,secondName: decoded.secondName} });
     } catch (err) {
         return res.status(401).json({ message: 'Invalid token' });
     }
