@@ -87,7 +87,7 @@ export default function SidebarLayout({ children }) {
                         <div className={styles.mobileLogOut}>
                             {user && (
                                 <button onClick={handleLogout} className={styles.logoutButton}>
-                                    <IconSvgLogout />
+                                    <IconSvgLogout/>
                                     <span>Logout</span>
                                 </button>
                             )}
