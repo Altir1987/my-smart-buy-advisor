@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Spinner from '@/components/spinner/Spinner';
 import { useSearchParams } from 'next/navigation';
-import styles from './ChatPage.module.css';      // ⬅️ главное нововведение
+import styles from './chatPage.module.css';
 
 export default function ChatPage() {
     const [input, setInput]           = useState('');
