@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import styles from './auth.module.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useUser } from "/app/context/UseContext";
@@ -13,7 +12,6 @@ export default function AuthPage() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const router = useRouter();
     const { setUser } = useUser();
 
 
@@ -49,13 +47,18 @@ export default function AuthPage() {
             const data = await res.json();
 
             if (res.ok) {
-                alert('Registration successful!');
-                setIsLogin(true);
-                setName('');
-                setEmail('');
-                setPassword('');
-                setConfirmPassword('');
-                router.push('/login');
+                const loginRes = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+                const loginData = await loginRes.json();
+                if (loginRes.ok) {
+                    setUser(loginData.user);
+                    window.location.href = '/chat';
+                } else {
+                    alert(loginData.message || 'Registration succeeded, but login failed.');
+                }
             } else {
                 alert(data.message || 'Registration failed');
             }
