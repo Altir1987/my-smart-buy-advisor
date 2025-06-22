@@ -68,7 +68,6 @@ export default function ChatPage() {
     }, [searchParams]);
     const sendMessage = async () => {
         if (!input.trim()) return alert('Напишите что-нибудь 😊');
-
         const userMessage = { role: 'user', content: input };
         const newChat     = [...chat, userMessage];
         setChat(newChat);
@@ -82,15 +81,28 @@ export default function ChatPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify({ messages: cleanMessages, sessionId }),
             });
-            const data = await res.json();
+
+            let data;
+            try {
+                data = await res.json();
+            } catch {
+                const text = await res.text();
+                throw new Error(text);
+            }
+            if (!res.ok) {
+                alert(data?.message || data || 'Ошибка запроса');
+                return;
+            }
             const assistantMessage = data.choices?.[0]?.message;
             if (assistantMessage) setChat([...newChat, assistantMessage]);
         } catch (err) {
             console.error(err);
+            alert(err.message || 'Ошибка');
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className={styles.chatPage}>
