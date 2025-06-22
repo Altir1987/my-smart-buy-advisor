@@ -33,10 +33,23 @@ export default function AuthPage() {
             }
             return;
         }
+        if (!name.trim()) {
+            alert('Enter your name');
+            return;
+        }
+        if (!/^\S+@\S+\.\S+$/.test(email)) {
+            alert('Enter a valid email address');
+            return;
+        }
+        if (password.length < 6) {
+            alert('Password must be at least 6 characters');
+            return;
+        }
         if (password !== confirmPassword) {
             alert('Passwords do not match');
             return;
         }
+
 
         try {
             const res = await fetch('/api/auth/register', {
