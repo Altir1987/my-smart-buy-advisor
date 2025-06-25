@@ -42,7 +42,7 @@ export default function SidebarLayout({ children }) {
                             className={`${styles.link} ${pathname === '/chat' ? styles.active : ''}`}
                             onClick={() => isMobile && setMenuOpen(false)}
                         >
-                            <IconSvgChat color={pathname === '/chat' ? '#4785F0' : 'black'} />
+                            <IconSvgChat color={pathname === '/chat' ? '#4785F0' : 'black'}/>
                             Chat
                         </Link>
                         <Link

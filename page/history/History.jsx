@@ -4,12 +4,14 @@ import { formatDistanceToNow } from 'date-fns';
 import styles from './history.module.css';
 import { useUser } from "/app/context/UseContext"
 import IconSvgClose from "components/Icons/IconSvgClose"
+import Skeleton from "@/components/skeleton/Skeleton";
 
 export default function History() {
    const [sessions, setSessions] = useState([]);
    const [error, setError] = useState('');
    const [modalSession, setModalSession] = useState(null);
    const [confirmDeleteSessionId, setConfirmDeleteSessionId] = useState(null);
+   const [loading, setLoading] = useState(true);
    const router = useRouter();
    const { user } = useUser();
    const renderWithLinks = (text) => {
@@ -50,6 +52,7 @@ export default function History() {
          } else {
             setError('Unauthorized');
          }
+         setLoading(false)
       }
       fetchHistory();
    }, []);
@@ -71,10 +74,14 @@ export default function History() {
 
    return (
        <div className={styles.wrapper}>
-          <h1 className={styles.title}>{sessions.length === 0 ? 'History Empty' : 'History Message'}</h1>
+          <h1 className={styles.title}>
+             {loading
+                 ? ''
+                 : (sessions.length === 0 ? 'History Empty' : 'History Message')}
+          </h1>
           {error && <p style={{ color: 'red' }}>{error}</p>}
-
-          {sessions.map((session) => {
+          {loading && <Skeleton />}
+          {!loading && sessions.map((session) => {
              const firstUserMsg = session.messages.find(msg => msg.role === 'user');
              return (
                  <div onClick={() => setModalSession(session)}

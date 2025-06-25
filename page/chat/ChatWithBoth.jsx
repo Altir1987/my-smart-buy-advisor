@@ -3,10 +3,12 @@ import { useState, useEffect } from 'react';
 import Spinner from '@/components/spinner/Spinner';
 import { useSearchParams } from 'next/navigation';
 import styles from './chatPage.module.css';
+import Skeleton from "@/components/skeleton/Skeleton";
 
 export default function ChatPage() {
     const [input, setInput]           = useState('');
     const [chat, setChat]             = useState([]);
+    const [skeletonLoading, setSkeletonLoading] = useState(true);
     const [loading, setLoading]       = useState(false);
     const [sessionId, setSessionId]   = useState(null);
     const searchParams                = useSearchParams();
@@ -41,19 +43,26 @@ export default function ChatPage() {
     }
 
     useEffect(() => {
+        setSkeletonLoading(true);
         const resumeSessionId = searchParams.get('resume');
-
+        const minTime = new Promise(resolve => setTimeout(resolve, 500));
         if (resumeSessionId) {
             setSessionId(resumeSessionId);
-            fetch(`/api/session-messages?sessionId=${resumeSessionId}`)
-                .then(res => res.json())
-                .then(data => setChat(data.messages || []))
-                .catch(() => setChat([]));
+            Promise.all([
+                fetch(`/api/session-messages?sessionId=${resumeSessionId}`)
+                    .then(res => res.json())
+                    .then(data => setChat(data.messages || []))
+                    .catch(() => setChat([])),
+                minTime,
+            ]).finally(() => setSkeletonLoading(false));
         } else {
-            fetch('/api/start-session', { method: 'POST' })
-                .then(res => res.json())
-                .then(data => setSessionId(data.sessionId))
-                .catch(() => alert('Не удалось создать сессию'));
+            Promise.all([
+                fetch('/api/start-session', { method: 'POST' })
+                    .then(res => res.json())
+                    .then(data => setSessionId(data.sessionId))
+                    .catch(() => alert('something went wrong')),
+                minTime,
+            ]).finally(() => setSkeletonLoading(false));
         }
 
         return () => {
@@ -108,29 +117,33 @@ export default function ChatPage() {
 
     return (
         <div className={styles.chatPage}>
-            {chat.length === 0 && <h1 className={styles.header}>How may I assist you?</h1>}
-            <div className={styles.messages}>
-                {chat.map((msg, idx) => (
-                    <div
-                        key={idx}
-                        className={`${styles.bubble} ${msg.role === 'user' ? styles.user : styles.assistant}`}
-                    >
-                        {renderWithLinks(msg.content)}
+            {skeletonLoading && <Skeleton type="chat" />}
+            {!skeletonLoading && (
+                <>
+                    {chat.length === 0 && <h1 className={styles.header}>How may I assist you?</h1>}
+                    <div className={styles.messages}>
+                        {chat.map((msg, idx) => (
+                            <div
+                                key={idx}
+                                className={`${styles.bubble} ${msg.role === 'user' ? styles.user : styles.assistant}`}
+                            >
+                                {renderWithLinks(msg.content)}
+                            </div>
+                        ))}
+                        {loading && <Spinner message="thinking…" />}
                     </div>
-                ))}
-                {loading && <Spinner message="thinking…" />}
-            </div>
-
-            <div className={styles.inputArea}>
-                <input
-                    className={styles.inputField}
-                    value={input}
-                    onChange={e => setInput(e.target.value)}
-                    placeholder="Feel free to ask anything"
-                    onKeyDown={e => { if (e.key === 'Enter') sendMessage(); }}
-                />
-                <button className={styles.iconBtn} onClick={sendMessage}>➤</button>
-            </div>
+                    <div className={styles.inputArea}>
+                        <input
+                            className={styles.inputField}
+                            value={input}
+                            onChange={e => setInput(e.target.value)}
+                            placeholder="Feel free to ask anything"
+                            onKeyDown={e => { if (e.key === 'Enter') sendMessage(); }}
+                        />
+                        <button className={styles.iconBtn} onClick={sendMessage}>➤</button>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

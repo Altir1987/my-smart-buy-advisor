@@ -4,6 +4,7 @@ import { useState } from 'react';
 import styles from './auth.module.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useUser } from "/app/context/UseContext";
+import Spinner from "@/components/spinner/Spinner";
 
 export default function AuthPage() {
     const [isLogin, setIsLogin] = useState(true);
@@ -12,6 +13,7 @@ export default function AuthPage() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [redirecting, setRedirecting] = useState(false);
     const { setUser } = useUser();
 
 
@@ -27,6 +29,7 @@ export default function AuthPage() {
 
             if (res.ok) {
                 setUser(data.user);
+                setRedirecting(true);
                 window.location.href = '/chat';
             } else {
                 alert(data.message);
@@ -68,6 +71,7 @@ export default function AuthPage() {
                 const loginData = await loginRes.json();
                 if (loginRes.ok) {
                     setUser(loginData.user);
+                    setRedirecting(true);
                     window.location.href = '/chat';
                 } else {
                     alert(loginData.message || 'Registration succeeded, but login failed.');
@@ -84,6 +88,12 @@ export default function AuthPage() {
         <main className={styles.wrapper}>
             <section className={styles.card}>
                 <div className={styles.left}>
+                    {redirecting && (
+                        <div className={styles.loaderOverlay}>
+                            <div className={styles.loader}></div>
+                            <span className={styles.loaderText}>Welcome...</span>
+                        </div>
+                    )}
                     <h2 className={styles.logo}>Shopping Consultant</h2>
 
                     <h3 className={styles.subtitle}>

@@ -5,7 +5,7 @@ export default function Spinner({message}) {
     return(
         <div className={styles.container}>
             <div className={styles.spinner}></div>
-            <span>{message}</span>
+            <span className={styles.message}>{message}</span>
         </div>
     )
 }
