@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+'use client'
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styles from 'app/layouts/SideBarLayout.module.css';
@@ -7,19 +8,13 @@ import IconSvgHistory from '@/components/Icons/IconSvgHistory';
 import IconSvgUsers from '@/components/Icons/IconSvgUsers';
 import IconSvgLogout from '@/components/Icons/IconSvgLogout';
 import { useUser } from '/app/context/UseContext';
+import {useIsMobile} from "@/app/hook/useMobile";
 
 export default function SidebarLayout({ children }) {
     const pathname = usePathname();
+    const isMobile = useIsMobile(780)
     const { user } = useUser();
     const [menuOpen, setMenuOpen] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
-
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 780);
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     const handleLogout = async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
