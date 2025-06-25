@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styles from 'app/layouts/SideBarLayout.module.css';
@@ -12,96 +12,73 @@ export default function SidebarLayout({ children }) {
     const pathname = usePathname();
     const { user } = useUser();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 780);
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const handleLogout = async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
         window.location.href = '/login';
     };
 
-    const toggleMenu = () => setMenuOpen((p) => !p);
+    const toggleMenu = () => setMenuOpen((open) => !open);
 
     return (
         <div className={styles.wrapper}>
-            <aside className={styles.sidebar}>
-                <nav className={styles.nav}>
-                    {user && (
-                        <div className={styles.userPanelMobile}>
-                            <span className={styles.username}>{user.name}</span>
-                            <button onClick={toggleMenu} className={styles.menuToggle}>
-                                ☰
-                            </button>
-                        </div>
+            {isMobile && menuOpen && (
+                <div className={styles.overlay} onClick={toggleMenu} />
+            )}
+
+            <aside className={`${styles.sidebar} ${isMobile ? styles.mobileSidebar : ''} ${isMobile && menuOpen ? styles.open : ''}`}>
+                <nav>
+                    {isMobile && (
+                        <button className={styles.menuToggle} onClick={toggleMenu}>
+                            ☰
+                        </button>
                     )}
-
-                    <div
-                        className={`${styles.menuContent} ${
-                            menuOpen ? styles.open : ''
-                        }`}
-                    >
-                        <div className={styles.linkWrapper}>
-                            <div className={styles.linkContainer}>
-                                <Link
-                                    href="/chat"
-                                    className={`${styles.link} ${
-                                        pathname === '/chat' ? styles.active : ''
-                                    }`}
-                                >
-                                    <IconSvgChat
-                                        color={pathname === '/chat' ? '#4785F0' : 'black'}
-                                    />
-                                    <span>Chat</span>
-                                </Link>
-                            </div>
-                            <div className={styles.linkContainer}>
-                                <Link
-                                    href="/history"
-                                    className={`${styles.link} ${
-                                        pathname === '/history' ? styles.active : ''
-                                    }`}
-                                >
-                                    <IconSvgHistory
-                                        color={pathname === '/history' ? '#4785F0' : 'black'}
-                                    />
-                                    <span>History</span>
-                                </Link>
-                            </div>
-                                {user?.is_admin === 1 && (
-                                    <div className={styles.linkContainer}>
-                                        <Link
-                                        href="/users"
-                                        className={`${styles.link} ${
-                                            pathname === '/users' ? styles.active : ''
-                                        }`}
-                                    >
-                                        <IconSvgUsers
-                                            color={pathname === '/users' ? '#4785F0' : 'black'}
-                                        />
-                                        <span>Users</span>
-                                    </Link>
-                                    </div>
-
-                            )}
-                        </div>
-                        <div className={styles.mobileLogOut}>
-                            {user && (
-                                <button onClick={handleLogout} className={styles.logoutButton}>
-                                    <IconSvgLogout/>
-                                    <span>Logout</span>
-                                </button>
-                            )}
-                        </div>
-
+                    <div className={styles.linkList}>
+                        <Link
+                            href="/chat"
+                            className={`${styles.link} ${pathname === '/chat' ? styles.active : ''}`}
+                            onClick={() => isMobile && setMenuOpen(false)}
+                        >
+                            <IconSvgChat color={pathname === '/chat' ? '#4785F0' : 'black'} />
+                            Chat
+                        </Link>
+                        <Link
+                            href="/history"
+                            className={`${styles.link} ${pathname === '/history' ? styles.active : ''}`}
+                            onClick={() => isMobile && setMenuOpen(false)}
+                        >
+                            <IconSvgHistory color={pathname === '/history' ? '#4785F0' : 'black'} />
+                            History
+                        </Link>
+                        {user?.is_admin === 1 && (
+                            <Link
+                                href="/users"
+                                className={`${styles.link} ${pathname === '/users' ? styles.active : ''}`}
+                                onClick={() => isMobile && setMenuOpen(false)}
+                            >
+                                <IconSvgUsers color={pathname === '/users' ? '#4785F0' : 'black'} />
+                                Users
+                            </Link>
+                        )}
                     </div>
-                    {user && (
-                        <div className={styles.userPanel}>
-                            <span className={styles.username}>{user.name}</span>
-                            <button onClick={handleLogout} className={styles.logoutButton}>
-                                <IconSvgLogout />
-                                <span>Logout</span>
-                            </button>
-                        </div>
-                    )}
                 </nav>
+                {user && (
+                    <div className={styles.userPanel}>
+                        <p className={styles.username}>{user.name}</p>
+                        <button onClick={handleLogout} className={styles.logoutButton}>
+                            <IconSvgLogout />
+                            Logout
+                        </button>
+                    </div>
+                )}
             </aside>
 
             <main className={styles.main}>{children}</main>
