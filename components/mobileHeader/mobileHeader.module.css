@@ -37,30 +37,37 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    width: 100%;
 }
 .link {
     font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    font-size: 16px;
+    font-weight: 600;
+    font-size: 18px;
     text-decoration: none;
     color: #333;
     display: flex;
     align-items: center;
     gap: 8px;
     transition: color 0.2s;
+    padding: 8px 0 8px 40px;
 }
 .link:hover {
-    background: rgba(115, 183, 243, 0.08);
-}
-.link:hover {
-    color: #4785F0;
+    background-color: #DCEDFF;
 }
 
 .link.active {
     color: #4785F0;
     font-weight: 700;
 }
+.buttonWrapper{
+    padding: 8px 0;
+}
+.buttonWrapper:hover{
+    background-color: #DCEDFF;
+
+}
 .logoutButton {
+    padding-left: 40px;
     cursor: pointer;
     border-radius: 3px;
     border: none;
@@ -73,11 +80,6 @@
     font-size: 16px;
     color: #F48625;
     transition: background 0.15s;
-    padding: 0;
-}
-
-.logoutButton:hover {
-    background: rgba(244,134,37,0.08);
 }
 .pageName{
     font-family: 'Open Sans', sans-serif;

@@ -72,7 +72,7 @@ export default function MobileHeader({user,pathname, handleLogout}) {
                                 Users
                             </Link>
                         )}
-                        <div>
+                        <div className={styles.buttonWrapper}>
                             <button onClick={handleLogout} className={styles.logoutButton}>
                                 <IconSvgLogout />
                                 Logout
