@@ -12,14 +12,17 @@
 }
 
 .linkList {
-    width: 100%;
+    width: 150px;
     display: flex;
     flex-direction: column;
     align-items: baseline;
     padding-top: 44px;
+    gap: 8px;
 }
 
 .link {
+    width: 150px;
+    padding: 10px;
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     font-size: 20px;
@@ -28,16 +31,19 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 15px;
     transition: color 0.2s;
+
 }
 .link:hover {
-    color: #4785F0;
+    background-color: #DCEDFF;
+    border-radius: 8px;
 }
 
 .link.active {
     color: #4785F0;
     font-weight: 700;
+    background-color: #DCEDFF;
+    border-radius: 8px;
 }
 
 .userPanel {

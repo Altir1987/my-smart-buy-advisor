@@ -53,17 +53,21 @@
 }
 .link:hover {
     background-color: #DCEDFF;
+    border-radius: 6px;
 }
 
 .link.active {
     color: #4785F0;
     font-weight: 700;
+    background-color: #DCEDFF;
+    border-radius: 6px;
 }
 .buttonWrapper{
     padding: 8px 0;
 }
 .buttonWrapper:hover{
     background-color: #DCEDFF;
+    border-radius: 6px;
 
 }
 .logoutButton {
@@ -88,4 +92,6 @@
     line-height: 100%;
     letter-spacing: -0.24px;
     text-align: center;
+    color: #4785F0;
+    display: none;
 }
