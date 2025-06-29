@@ -4,6 +4,7 @@ import Spinner from '@/components/spinner/Spinner';
 import { useSearchParams } from 'next/navigation';
 import styles from './chatPage.module.css';
 import Skeleton from "@/components/skeleton/Skeleton";
+import useSpeechRecognition from "@/app/hooks/useSpeechRecognition";
 
 export default function ChatPage() {
     const [input, setInput]           = useState('');
@@ -12,6 +13,10 @@ export default function ChatPage() {
     const [loading, setLoading]       = useState(false);
     const [sessionId, setSessionId]   = useState(null);
     const searchParams                = useSearchParams();
+    const { isRecording, toggleRecognition } = useSpeechRecognition((transcript) => {
+        setInput(prev => prev + ' ' + transcript);
+    });
+
     const renderWithLinks = (text) => {
         const urlRegex = /<?(https?:\/\/[^\s<>\"]+)>?/g;
         const parts = [];
@@ -133,14 +138,25 @@ export default function ChatPage() {
                         {loading && <Spinner message="thinking…" />}
                     </div>
                     <div className={styles.inputArea}>
-                        <input
-                            className={styles.inputField}
-                            value={input}
-                            onChange={e => setInput(e.target.value)}
-                            placeholder="Feel free to ask anything"
-                            onKeyDown={e => { if (e.key === 'Enter') sendMessage(); }}
-                        />
-                        <button className={styles.iconBtn} onClick={sendMessage}>➤</button>
+                        <div className={styles.inputWrapper}>
+                            <input
+                                className={styles.inputField}
+                                value={input}
+                                onChange={e => setInput(e.target.value)}
+                                placeholder="Feel free to ask anything"
+                                onKeyDown={e => { if (e.key === 'Enter') sendMessage(); }}
+                            />
+                            <button className={styles.iconBtn} onClick={sendMessage}>➤</button>
+
+                        </div>
+                        <div className={styles.record}>
+                            <button  className={`${styles.iconBtn} ${isRecording ? styles.recording : ''}`}
+                                 onClick={toggleRecognition}>
+                                🎤
+                             </button>
+                            {isRecording && <span className={styles.recordingText}>🎙️ speak...</span>}
+                        </div>
+
                     </div>
                 </>
             )}

@@ -1,9 +1,9 @@
-'use client'
+
 
 import { usePathname } from 'next/navigation';
 import styles from 'app/layouts/SideBarLayout.module.css';
 import { useUser } from '/app/context/UseContext';
-import {useIsMobile} from "@/app/hook/useMobile";
+import {useIsMobile} from "@/app/hooks/useMobile";
 import DesktopSideBar from "@/components/desctopSideBar/DesktopSideBar";
 import MobileHeader from "@/components/mobileHeader/MobileHeader";
 

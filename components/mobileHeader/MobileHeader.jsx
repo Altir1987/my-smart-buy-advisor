@@ -1,4 +1,4 @@
-'use client'
+
 import styles from '@/components/mobileHeader/mobileHeader.module.css'
 import {useState} from "react";
 import Link from "next/link";

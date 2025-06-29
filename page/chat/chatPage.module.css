@@ -44,20 +44,27 @@
 
 .inputArea {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     min-height: 60px;
     height: 100%;
-    gap: 12px;
+    gap: 8px;
     border: 2px solid #e4e6eb;
     border-radius: 16px;
     padding: 6px 14px;
 }
-.inputField { flex: 1;
+.inputWrapper{
+    display: flex;
+    align-items: center;
+
+}
+.inputField {
+    flex: 1;
     border: none;
     outline: none;
     font-size: 15px;
     background: transparent;
 }
+
 .iconBtn {
     width: 34px;
     height: 34px;
@@ -90,3 +97,31 @@
     font-weight: 600;
     color: #4785F0;
 }
+.record{
+    display: flex;
+    align-items: center;
+}
+.recording {
+    animation: pulse 1s infinite;
+    background-color: #ffdddd;
+    border: 1px solid #cc0000;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+.recordingText {
+    margin-left: 10px;
+    color: #cc0000;
+    font-weight: bold;
+    animation: blink 1.2s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
