@@ -13,9 +13,10 @@ export default function ChatPage() {
     const [loading, setLoading]       = useState(false);
     const [sessionId, setSessionId]   = useState(null);
     const searchParams                = useSearchParams();
+    const [language, setLanguage] = useState('en-US');
     const { isRecording, toggleRecognition } = useSpeechRecognition((transcript) => {
         setInput(prev => prev + ' ' + transcript);
-    });
+    }, language);
 
     const renderWithLinks = (text) => {
         const urlRegex = /<?(https?:\/\/[^\s<>\"]+)>?/g;
@@ -104,7 +105,7 @@ export default function ChatPage() {
             }
 
             if (!res.ok) {
-                alert((isJson && data?.message) ? data.message : data || 'Ошибка запроса');
+                alert((isJson && data?.message) ? data.message : data || 'something went wrong');
                 return;
             }
 
@@ -112,7 +113,7 @@ export default function ChatPage() {
             if (assistantMessage) setChat([...newChat, assistantMessage]);
         } catch (err) {
             console.error(err);
-            alert(err.message || 'Ошибка');
+            alert(err.message || 'error message');
         } finally {
             setLoading(false);
         }
@@ -154,6 +155,21 @@ export default function ChatPage() {
                                  onClick={toggleRecognition}>
                                 🎤
                              </button>
+                            {
+                                !isRecording &&
+                                <div className={styles.languageSelect}>
+                                    <select
+                                        id="lang"
+                                        value={language}
+                                        onChange={(e) => setLanguage(e.target.value)}
+                                    >
+                                        <option value="en-US">Eng</option>
+                                        <option value="uk-UA">Ua</option>
+                                        <option value="ru-RU">Ru</option>
+                                    </select>
+                                </div>
+                            }
+
                             {isRecording && <span className={styles.recordingText}>🎙️ speak...</span>}
                         </div>
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-export default function useSpeechRecognition(onResult) {
+export default function useSpeechRecognition(onResult, language) {
     const recognitionRef = useRef(null);
     const [isRecording, setIsRecording] = useState(false);
 
@@ -9,7 +9,7 @@ export default function useSpeechRecognition(onResult) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const recognition = new SpeechRecognition();
 
-            recognition.lang = 'en-US';
+            recognition.lang = language;
             recognition.interimResults = false;
             recognition.maxAlternatives = 1;
 
@@ -17,7 +17,7 @@ export default function useSpeechRecognition(onResult) {
             recognition.onend = () => setIsRecording(false);
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
-                onResult(transcript); // передаём в родитель
+                onResult(transcript);
             };
 
             recognition.onerror = (event) => {

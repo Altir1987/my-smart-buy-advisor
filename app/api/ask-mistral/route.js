@@ -8,9 +8,17 @@ export async function POST(req) {
     if (!user) {
         return new Response(JSON.stringify({ message: 'Unauthorized' }), { status: 401 });
     }
+    const detectLanguage = (text) => {
+        if (/[\u0400-\u04FF]/.test(text)) {
+            if (/ї|є|ґ|і/.test(text.toLowerCase())) return 'Ukrainian';
+            return 'Russian';
+        }
+        return 'English';
+    };
 
     const { messages = [], sessionId } = await req.json();
     const lastUserMsg = messages.at(-1);
+    const language = lastUserMsg?.content ? detectLanguage(lastUserMsg.content) : 'English';
 
     if (!sessionId) {
         return new Response(JSON.stringify({ message: 'Missing sessionId' }), { status: 400 });
@@ -33,11 +41,22 @@ export async function POST(req) {
                 {
                     role: 'system',
                     content: `
-                    You are a sales consultant who helps people choose a laptop.
-You do not give advice about other products (phones, TVs, clothes, etc.).
-If a user asks about anything other than laptops, politely tell them that you only consult about laptops, and ask them to clarify what they need from a laptop: budget, tasks, and preferences.
-Reply politely and briefly.
-          `,
+You are a sales consultant who helps people choose a laptop.
+
+You only respond in the same language the user used — without translations or duplicates.
+
+Use Cyrillic letters when replying in Russian or Ukrainian.
+
+Do not add English translations if the user's message was not in English.
+
+If the user writes in Russian, respond only in Russian using Cyrillic.
+
+If the user writes in Ukrainian, respond only in Ukrainian using Cyrillic.
+
+If the user writes in English, respond in English.
+
+Be polite and brief. Do not repeat the same message in multiple languages.
+`.trim()
                 },
                 ...messages,
             ],
