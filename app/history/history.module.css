@@ -87,6 +87,49 @@
     align-items: flex-start;
     position: relative;
 }
+.modalMsgText :where(ul) {
+    margin: 8px 0 8px 20px;
+    padding: 0;
+    list-style: disc inside;
+}
+
+.modalMsgText :where(ol) {
+    margin: 8px 0 8px 20px;
+    padding: 0;
+    list-style: decimal inside;
+}
+
+.modalMsgText :where(li) {
+    margin-bottom: 2px;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.modalMsgText :where(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 14px;
+}
+
+.modalMsgText :where(th),
+.modalMsgText :where(td) {
+    border: 1px solid #a2d1f7;
+    padding: 6px 10px;
+    text-align: left;
+}
+
+.modalMsgText :where(th) {
+    background: #e7f3ff;
+    font-weight: bold;
+}
+
+.modalMsgText :where(a) {
+    color: #4785F0;
+    text-decoration: underline;
+    word-break: break-all;
+}
+
 .closeButton{
     position: absolute;
     padding: 0;

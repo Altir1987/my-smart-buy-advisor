@@ -1,5 +1,3 @@
-
-
 import { usePathname } from 'next/navigation';
 import styles from 'app/layouts/SideBarLayout.module.css';
 import { useUser } from '/app/context/UseContext';

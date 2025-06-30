@@ -4,7 +4,6 @@ import { useState } from 'react';
 import styles from './auth.module.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useUser } from "/app/context/UseContext";
-import Spinner from "@/components/spinner/Spinner";
 
 export default function AuthPage() {
     const [isLogin, setIsLogin] = useState(true);

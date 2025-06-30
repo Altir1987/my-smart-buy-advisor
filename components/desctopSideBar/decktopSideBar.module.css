@@ -18,6 +18,9 @@
     align-items: baseline;
     padding-top: 44px;
     gap: 8px;
+    position: fixed;
+    top: 6px;
+    left: 22px;
 }
 
 .link {
@@ -49,12 +52,14 @@
 .userPanel {
     margin-top: 2rem;
     padding-top: 1rem;
+    width: 200px;
     padding-bottom: 40px;
     border-top: 1px solid #ccc;
-    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: fixed;
+    bottom: 0;
 }
 
 .username {

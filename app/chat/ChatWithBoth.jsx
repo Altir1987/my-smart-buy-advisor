@@ -1,10 +1,10 @@
-'use client';
 import { useState, useEffect } from 'react';
 import Spinner from '@/components/spinner/Spinner';
 import { useSearchParams } from 'next/navigation';
 import styles from './chatPage.module.css';
 import Skeleton from "@/components/skeleton/Skeleton";
 import useSpeechRecognition from "@/app/hooks/useSpeechRecognition";
+import ReactMarkdown from 'react-markdown';
 
 export default function ChatPage() {
     const [input, setInput]           = useState('');
@@ -13,10 +13,13 @@ export default function ChatPage() {
     const [loading, setLoading]       = useState(false);
     const [sessionId, setSessionId]   = useState(null);
     const searchParams                = useSearchParams();
-    const [language, setLanguage] = useState('en-US');
+    const [language, setLanguage] = useState(() => localStorage.getItem('chatLanguage') || 'en-US');
     const { isRecording, toggleRecognition } = useSpeechRecognition((transcript) => {
         setInput(prev => prev + ' ' + transcript);
     }, language);
+    useEffect(() => {
+        localStorage.setItem('chatLanguage', language);
+    }, [language])
 
     const renderWithLinks = (text) => {
         const urlRegex = /<?(https?:\/\/[^\s<>\"]+)>?/g;
@@ -133,7 +136,10 @@ export default function ChatPage() {
                                 key={idx}
                                 className={`${styles.bubble} ${msg.role === 'user' ? styles.user : styles.assistant}`}
                             >
-                                {renderWithLinks(msg.content)}
+                                {msg.role === 'assistant'
+                                    ? <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                    : renderWithLinks(msg.content)
+                                }
                             </div>
                         ))}
                         {loading && <Spinner message="thinking…" />}

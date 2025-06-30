@@ -1,31 +1,33 @@
-import pool from '../../db';
+import pool from '@/db';
 import jwt from 'jsonwebtoken';
 import cookie from 'cookie';
 
-export default async function handler(req, res) {
-    const cookies = cookie.parse(req.headers.cookie || '');
+export async function GET(req) {
+    const cookies = cookie.parse(req.headers.get('cookie') || '');
     const token = cookies.token;
 
     if (!token) {
-        return res.status(401).json({ message: 'Unauthorized: no token' });
+        return new Response(JSON.stringify({ message: 'Unauthorized: no token' }), {
+            status: 401,
+        });
     }
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         const [rows] = await pool.query(`
-            SELECT
-                s.id AS session_id,
-                s.started_at,
-                s.is_closed,
-                m.role,
-                m.content,
-                m.created_at
-            FROM sessions s
-                     JOIN messages m ON m.session_id = s.id
-            WHERE s.user_id = ?
-            ORDER BY s.started_at DESC, m.created_at ASC
-        `, [decoded.id]);
+      SELECT
+        s.id AS session_id,
+        s.started_at,
+        s.is_closed,
+        m.role,
+        m.content,
+        m.created_at
+      FROM sessions s
+      JOIN messages m ON m.session_id = s.id
+      WHERE s.user_id = ?
+      ORDER BY s.started_at DESC, m.created_at ASC
+    `, [decoded.id]);
 
         const sessionsMap = new Map();
 
@@ -49,9 +51,13 @@ export default async function handler(req, res) {
 
         const sessions = Array.from(sessionsMap.values());
 
-        res.status(200).json({ sessions });
+        return new Response(JSON.stringify({ sessions }), {
+            status: 200,
+        });
     } catch (err) {
         console.error('❌ JWT error:', err.message);
-        res.status(401).json({ message: 'Invalid token' });
+        return new Response(JSON.stringify({ message: 'Invalid token' }), {
+            status: 401,
+        });
     }
 }

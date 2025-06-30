@@ -24,7 +24,7 @@ export default function DesktopSideBar ({user,pathname,handleLogout}) {
                         <IconSvgHistory color={pathname === '/history' ? '#4785F0' : 'black'} />
                         History
                     </Link>
-                    {user?.is_admin === 1 && (
+                    {user?.user.is_admin === 1 && (
                         <Link
                             href="/users"
                             className={`${styles.link} ${pathname === '/users' ? styles.active : ''}`}
@@ -37,7 +37,7 @@ export default function DesktopSideBar ({user,pathname,handleLogout}) {
             </nav>
             {user && (
                 <div className={styles.userPanel}>
-                    <p className={styles.username}>{user.name}</p>
+                    <p className={styles.username}>{user.user.name}</p>
                     <button onClick={handleLogout} className={styles.logoutButton}>
                         <IconSvgLogout />
                         Logout

@@ -5,6 +5,7 @@ import styles from './history.module.css';
 import { useUser } from "/app/context/UseContext"
 import IconSvgClose from "components/Icons/IconSvgClose"
 import Skeleton from "@/components/skeleton/Skeleton";
+import ReactMarkdown from 'react-markdown';
 
 export default function History() {
    const [sessions, setSessions] = useState([]);
@@ -14,6 +15,7 @@ export default function History() {
    const [loading, setLoading] = useState(true);
    const router = useRouter();
    const { user } = useUser();
+
    const renderWithLinks = (text) => {
       const urlRegex = /<?(https?:\/\/[^\s<>\"]+)>?/g;
       const parts = [];
@@ -95,7 +97,7 @@ export default function History() {
                     >
                        {user && (
                            <strong className={styles.name}>
-                              {user.name}
+                              {user.user.name}
                            </strong>
                        )}
                        <span className={styles.content}>
@@ -116,9 +118,15 @@ export default function History() {
                        {modalSession.messages.map((msg, i) => (
                            <div key={i} className={styles.modalMsgItem}>
                               <div className={styles.modalMsgName}>
-                                 {msg.role === 'user' ? user.name : 'Assistant'}:
+                                 {msg.role === 'user' ? user.user.name : 'Assistant'}:
                               </div>
-                              <div className={styles.modalMsgText}>{renderWithLinks(msg.content)}</div>
+                              <div className={styles.modalMsgText}>
+                                 {msg.role === 'assistant'
+                                     ? <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                     : renderWithLinks(msg.content)
+                                 }
+                              </div>
+
                            </div>
                        ))}
                     </div>
