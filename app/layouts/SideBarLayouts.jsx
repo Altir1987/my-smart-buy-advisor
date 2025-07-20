@@ -13,7 +13,7 @@ export default function SidebarLayout({ children }) {
         await fetch('/api/auth/logout', { method: 'POST' });
         window.location.href = '/login';
     };
-    if (isMobile === null) return null;
+    if (isMobile === null || !user) return null;
 
     return (
         <div className={styles.wrapper}>

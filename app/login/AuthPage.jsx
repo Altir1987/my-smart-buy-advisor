@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { toast } from 'sonner';
 import styles from '@/app/login/auth.module.css';
+import { toast } from 'sonner';
 import { useUser } from '@/app/context/useContext';
-import { safeFetch } from '@/app/hooks/useSafeFetch';
+import { useLogin } from "@/app/hooks/useLogin";
+import { useRegister } from "@/app/hooks/useRegister";
+import { validateRegistration } from '@/app/utils/validateRegistration';
 
 export default function AuthPage() {
     const [isLogin, setIsLogin] = useState(true);
@@ -14,57 +16,29 @@ export default function AuthPage() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [redirecting, setRedirecting] = useState(false);
     const { setUser } = useUser();
-
+    const { login, loading: loginLoading } = useLogin(setUser);
+    const { register, loading: registerLoading } = useRegister(setUser);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!isLogin) {
-            if (!name.trim()) { toast.error('Enter your name'); return; }
-            if (!/^\S+@\S+\.\S+$/.test(email)) { toast.error('Enter a valid email address'); return; }
-            if (password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
-            if (password !== confirmPassword) { toast.error('Passwords do not match'); return; }
+            const error = validateRegistration(name, email, password, confirmPassword);
+            if (error) return toast.error(error);
         }
 
-        if (isLogin) {
-            try {
-                const data = await safeFetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password }),
-                });
-                setUser(data.user);
-                setRedirecting(true);
-                window.location.href = '/chat';
-            } catch {}
-            return;
-        }
+        const success = isLogin
+            ? await login(email, password)
+            : await register(name, email, password);
 
-        try {
-            await safeFetch('/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password }),
-            });
-            try {
-                const loginData = await safeFetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password }),
-                });
-                setUser(loginData.user);
-                setRedirecting(true);
-                window.location.href = '/chat';
-            } catch {}
-        } catch {}
+        if (success) setTimeout(() => window.location.href='/chat', 400);
     };
     return (
         <main className={styles.wrapper}>
             <section className={styles.card}>
                 <div className={styles.left}>
-                    {redirecting && (
+                    {(loginLoading || registerLoading) && (
                         <div className={styles.loaderOverlay}>
                             <div className={styles.loader}></div>
                             <span className={styles.loaderText}>Welcome...</span>
@@ -151,7 +125,10 @@ export default function AuthPage() {
                             />
                         )}
 
-                        <button type="submit" className={styles.primaryBtn}>
+                        <button
+                            disabled={loginLoading || registerLoading}
+                            type="submit"
+                            className={styles.primaryBtn}>
                             {isLogin ? 'Login' : 'Register'}
                         </button>
                     </form>

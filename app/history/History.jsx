@@ -1,4 +1,4 @@
-import { useEffect, useState} from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
@@ -6,70 +6,22 @@ import styles from '@/app/history/history.module.css';
 import { useUser } from '@/app/context/useContext';
 import IconSvgClose from '@/components/Icons/IconSvgClose';
 import Skeleton from '@/components/skeleton/Skeleton';
-import { safeFetch } from '@/app/hooks/useSafeFetch';
+import { useHistory } from '@/app/hooks/useHistory';
+import { renderWithLinks } from '@/app/utils/renderWithLinks';
 
 
 export default function History() {
-   const [sessions, setSessions] = useState([]);
-   const [error, setError] = useState('');
    const [modalSession, setModalSession] = useState(null);
    const [confirmDeleteSessionId, setConfirmDeleteSessionId] = useState(null);
-   const [loading, setLoading] = useState(true);
    const router = useRouter();
    const { user } = useUser();
-
-   const renderWithLinks = (text) => {
-      const urlRegex = /<?(https?:\/\/[^\s<>\"]+)>?/g;
-      const parts = [];
-      let lastIndex = 0;
-      let match;
-
-      while ((match = urlRegex.exec(text)) !== null) {
-         if (match.index > lastIndex) {
-            parts.push(text.substring(lastIndex, match.index));
-         }
-         const url = match[1];
-         parts.push(
-             <a
-                 key={url + match.index}
-                 href={url}
-                 target="_blank"
-                 rel="noopener noreferrer"
-                 className={styles.link}
-             >
-                {url}
-             </a>
-         );
-         lastIndex = match.index + match[0].length;
-      }
-      if (lastIndex < text.length) {
-         parts.push(text.substring(lastIndex));
-      }
-      return parts;
-   }
-   useEffect(() => {
-      async function fetchHistory() {
-         try {
-            const data = await safeFetch('/api/history');
-            setSessions(data.sessions);
-         } catch (err) {
-            setError('Unauthorized');
-         }
-         setLoading(false);
-      }
-      fetchHistory();
-   }, []);
+   const { sessions, error, loading, deleteSession } = useHistory();
    const confirmDeleteSession = async () => {
       if (!confirmDeleteSessionId) return;
       try {
-         await safeFetch('/api/delete-session', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: confirmDeleteSessionId }),
-         });
-         setSessions(prev => prev.filter(s => s.session_id !== confirmDeleteSessionId));
+         await deleteSession(confirmDeleteSessionId);
          setModalSession(null);
-      } catch (err) {}
+      } catch {}
       setConfirmDeleteSessionId(null);
    };
 
@@ -91,9 +43,7 @@ export default function History() {
                     <div className={styles.date}>
                        {formatDistanceToNow(new Date(session.started_at), { addSuffix: true })}
                     </div>
-                    <div
-                        className={styles.shortPreview}
-                    >
+                    <div className={styles.shortPreview}>
                        {user && (
                            <strong className={styles.name}>
                               {user.user.name}
@@ -109,7 +59,7 @@ export default function History() {
           {modalSession && (
               <div className={styles.modalBackdrop} onClick={() => setModalSession(null)}>
                  <div className={styles.modalWindow} onClick={e => e.stopPropagation()}>
-                    <button className={styles.closeButton} type={"button"} onClick={() => setModalSession(null)}>
+                    <button className={styles.closeButton} type="button" onClick={() => setModalSession(null)}>
                        <IconSvgClose color='#4785F0'/>
                     </button>
                     <div className={styles.modalTitle}>Full History</div>
@@ -122,10 +72,9 @@ export default function History() {
                               <div className={styles.modalMsgText}>
                                  {msg.role === 'assistant'
                                      ? <ReactMarkdown>{msg.content}</ReactMarkdown>
-                                     : renderWithLinks(msg.content)
+                                     : renderWithLinks(msg.content, styles.link)
                                  }
                               </div>
-
                            </div>
                        ))}
                     </div>
