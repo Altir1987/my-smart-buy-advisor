@@ -1,11 +1,11 @@
-import styles from "@/components/desctopSideBar/decktopSideBar.module.css";
+import styles from "@/components/desktopSidebar/desktopSidebar.module.css";
 import Link from "next/link";
 import IconSvgChat from "@/components/Icons/IconSvgChat";
 import IconSvgHistory from "@/components/Icons/IconSvgHistory";
 import IconSvgUsers from "@/components/Icons/IconSvgUsers";
 import IconSvgLogout from "@/components/Icons/IconSvgLogout";
 
-export default function DesktopSideBar ({user,pathname,handleLogout}) {
+export default function DesktopSidebar ({user,pathname,handleLogout}) {
     return (
         <aside className={styles.sidebar}>
             <nav>

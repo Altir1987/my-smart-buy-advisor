@@ -2,7 +2,9 @@
 
 import './globals.css';
 import { usePathname } from 'next/navigation';
-import { UserProvider } from '@/app/context/UseContext';
+import { Toaster } from 'sonner';
+import { UserProvider } from '@/app/context/useContext';
+import {StoreProvider} from '@/app/context/storeContext'
 import SidebarLayout from '@/app/layouts/SideBarLayouts';
 
 export default function RootLayout({ children }) {
@@ -13,12 +15,15 @@ export default function RootLayout({ children }) {
     return (
         <html lang="en">
         <body>
+        <Toaster richColors position="top-center" />
         <UserProvider>
+            <StoreProvider>
             {isAuthPage ? (
                 children
             ) : (
                 <SidebarLayout>{children}</SidebarLayout>
             )}
+            </StoreProvider>
         </UserProvider>
         </body>
         </html>

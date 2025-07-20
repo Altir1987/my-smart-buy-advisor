@@ -1,11 +1,13 @@
 import { useEffect, useState} from 'react';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
-import styles from './history.module.css';
-import { useUser } from "/app/context/UseContext"
-import IconSvgClose from "components/Icons/IconSvgClose"
-import Skeleton from "@/components/skeleton/Skeleton";
 import ReactMarkdown from 'react-markdown';
+import styles from '@/app/history/history.module.css';
+import { useUser } from '@/app/context/useContext';
+import IconSvgClose from '@/components/Icons/IconSvgClose';
+import Skeleton from '@/components/skeleton/Skeleton';
+import { safeFetch } from '@/app/hooks/useSafeFetch';
+
 
 export default function History() {
    const [sessions, setSessions] = useState([]);
@@ -47,30 +49,27 @@ export default function History() {
    }
    useEffect(() => {
       async function fetchHistory() {
-         const res = await fetch('/api/history');
-         if (res.ok) {
-            const data = await res.json();
+         try {
+            const data = await safeFetch('/api/history');
             setSessions(data.sessions);
-         } else {
+         } catch (err) {
             setError('Unauthorized');
          }
-         setLoading(false)
+         setLoading(false);
       }
       fetchHistory();
    }, []);
    const confirmDeleteSession = async () => {
       if (!confirmDeleteSessionId) return;
-      const res = await fetch('/api/delete-session', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ sessionId: confirmDeleteSessionId }),
-      });
-      if (res.ok) {
+      try {
+         await safeFetch('/api/delete-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: confirmDeleteSessionId }),
+         });
          setSessions(prev => prev.filter(s => s.session_id !== confirmDeleteSessionId));
          setModalSession(null);
-      } else {
-         alert('Something went wrong!');
-      }
+      } catch (err) {}
       setConfirmDeleteSessionId(null);
    };
 

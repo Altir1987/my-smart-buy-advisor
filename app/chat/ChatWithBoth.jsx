@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
-import Spinner from '@/components/spinner/Spinner';
 import { useSearchParams } from 'next/navigation';
-import styles from './chatPage.module.css';
-import Skeleton from "@/components/skeleton/Skeleton";
-import useSpeechRecognition from "@/app/hooks/useSpeechRecognition";
 import ReactMarkdown from 'react-markdown';
+import { toast } from 'sonner';
+import Spinner from '@/components/spinner/Spinner';
+import styles from '@/app/chat/chatPage.module.css';
+import Skeleton from '@/components/skeleton/Skeleton';
+import useSpeechRecognition from '@/app/hooks/useSpeechRecognition';
+import { safeFetch } from '@/app/hooks/useSafeFetch';
+
 
 export default function ChatPage() {
     const [input, setInput]           = useState('');
@@ -50,79 +53,63 @@ export default function ChatPage() {
         }
         return parts;
     }
-
     useEffect(() => {
         setSkeletonLoading(true);
         const resumeSessionId = searchParams.get('resume');
         const minTime = new Promise(resolve => setTimeout(resolve, 500));
-        if (resumeSessionId) {
-            setSessionId(resumeSessionId);
-            Promise.all([
-                fetch(`/api/session-messages?sessionId=${resumeSessionId}`)
-                    .then(res => res.json())
-                    .then(data => setChat(data.messages || []))
-                    .catch(() => setChat([])),
-                minTime,
-            ]).finally(() => setSkeletonLoading(false));
-        } else {
-            Promise.all([
-                fetch('/api/start-session', { method: 'POST' })
-                    .then(res => res.json())
-                    .then(data => setSessionId(data.sessionId))
-                    .catch(() => alert('something went wrong')),
-                minTime,
-            ]).finally(() => setSkeletonLoading(false));
-        }
+        (async () => {
+            try {
+                if (resumeSessionId) {
+                    setSessionId(resumeSessionId);
+                    const [data] = await Promise.all([
+                        safeFetch(`/api/session-messages?sessionId=${resumeSessionId}`),
+                        minTime,
+                    ]);
+                    setChat(data.messages || []);
+                } else {
+                    const [data] = await Promise.all([
+                        safeFetch('/api/start-session', { method: 'POST' }),
+                        minTime,
+                    ]);
+                    setSessionId(data.sessionId);
+                }
+            } catch (err) {
+                setChat([]);
+            } finally {
+                setSkeletonLoading(false);
+            }
+        })();
 
         return () => {
             if (!resumeSessionId && sessionId) {
-                fetch('/api/close-session', {
+                safeFetch('/api/close-session', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sessionId }),
-                });
+                }).catch(() => {});
             }
         };
     }, [searchParams]);
     const sendMessage = async () => {
-        if (!input.trim()) return alert('write something 😊');
+        if (!input.trim()) return toast.error('write something 😊');
         const userMessage = { role: 'user', content: input };
-        const newChat     = [...chat, userMessage];
+        const newChat = [...chat, userMessage];
         setChat(newChat);
         setInput('');
         setLoading(true);
 
         try {
             const cleanMessages = newChat.map(({ role, content }) => ({ role, content }));
-            const res  = await fetch('/api/ask-mistral', {
-                method:  'POST',
+            const data = await safeFetch('/api/ask-mistral', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ messages: cleanMessages, sessionId }),
+                body: JSON.stringify({ messages: cleanMessages, sessionId }),
             });
-            let data, isJson = false;
-            try {
-                data = await res.clone().json();
-                isJson = true;
-            } catch {
-                data = await res.text();
-            }
-
-            if (!res.ok) {
-                alert((isJson && data?.message) ? data.message : data || 'something went wrong');
-                return;
-            }
-
-            const assistantMessage = isJson ? data.choices?.[0]?.message : null;
+            const assistantMessage = data.choices?.[0]?.message;
             if (assistantMessage) setChat([...newChat, assistantMessage]);
-        } catch (err) {
-            console.error(err);
-            alert(err.message || 'error message');
-        } finally {
-            setLoading(false);
-        }
+        } catch {}
+        setLoading(false);
     };
-
-
 
     return (
         <div className={styles.chatPage}>

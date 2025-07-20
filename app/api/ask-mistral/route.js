@@ -1,13 +1,39 @@
+import * as yup from 'yup';
 import { verifyTokenFromCookie } from '@/lib/authMiddleware';
 import pool from '@/db';
 
 const apiKey = process.env.MISTRAL_API_KEY;
+
+const schema = yup.object().shape({
+    sessionId: yup.string().required(),
+    messages: yup.array().of(
+        yup.object().shape({
+            role: yup.string().oneOf(['user', 'assistant', 'system']).required(),
+            content: yup.string().min(1).required(),
+        })
+    ).min(1).required(),
+});
 
 export async function POST(req) {
     const user = verifyTokenFromCookie(req);
     if (!user) {
         return new Response(JSON.stringify({ message: 'Unauthorized' }), { status: 401 });
     }
+
+    let body;
+    try {
+        body = await req.json();
+        await schema.validate(body, { abortEarly: false });
+    } catch (validationError) {
+        return new Response(JSON.stringify({
+            message: 'Validation failed',
+            errors: validationError.errors,
+        }), { status: 400 });
+    }
+
+    const { messages = [], sessionId } = body;
+    const lastUserMsg = messages.at(-1);
+
     const detectLanguage = (text) => {
         if (/[\u0400-\u04FF]/.test(text)) {
             if (/ї|є|ґ|і/.test(text.toLowerCase())) return 'Ukrainian';
@@ -15,14 +41,8 @@ export async function POST(req) {
         }
         return 'English';
     };
-
-    const { messages = [], sessionId } = await req.json();
-    const lastUserMsg = messages.at(-1);
     const language = lastUserMsg?.content ? detectLanguage(lastUserMsg.content) : 'English';
 
-    if (!sessionId) {
-        return new Response(JSON.stringify({ message: 'Missing sessionId' }), { status: 400 });
-    }
     if (lastUserMsg?.role === 'user') {
         await pool.query(
             'INSERT INTO messages (user_id, session_id, role, content) VALUES (?, ?, ?, ?)',

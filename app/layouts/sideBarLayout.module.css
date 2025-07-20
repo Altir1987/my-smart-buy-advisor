@@ -1,0 +1,13 @@
+.wrapper {
+    display: flex;
+    min-height: 100vh;
+    @media screen and (max-width: 780px) {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+    }
+}
+.main {
+    flex-grow: 1;
+}
+

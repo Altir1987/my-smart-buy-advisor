@@ -1,14 +1,24 @@
 import pool from '@/db';
+import * as yup from 'yup';
+
+const schema = yup.object().shape({
+    sessionId: yup.number().integer().positive().required(),
+});
 
 export async function POST(req) {
     try {
-        const { sessionId } = await req.json();
+        const body = await req.json();
 
-        if (!sessionId) {
-            return new Response(JSON.stringify({ message: 'No sessionId provided' }), {
-                status: 400,
-            });
+        try {
+            await schema.validate(body, { abortEarly: false });
+        } catch (validationError) {
+            return new Response(JSON.stringify({
+                message: 'Validation failed',
+                errors: validationError.errors,
+            }), { status: 400 });
         }
+
+        const { sessionId } = body;
 
         await pool.query('UPDATE sessions SET is_closed = TRUE WHERE id = ?', [sessionId]);
 

@@ -1,7 +1,7 @@
 'use client';
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "/app/context/UseContext";
+import { useUser } from "@/app/context/useContext";
 
 export default function AuthGuard({ children }) {
     const { user, loading } = useUser();

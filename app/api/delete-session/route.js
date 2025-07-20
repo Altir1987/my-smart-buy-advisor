@@ -1,6 +1,11 @@
 import pool from '@/db';
 import jwt from 'jsonwebtoken';
 import cookie from 'cookie';
+import * as yup from 'yup';
+
+const schema = yup.object().shape({
+    sessionId: yup.number().integer().positive().required(),
+});
 
 export async function POST(req) {
     try {
@@ -14,13 +19,18 @@ export async function POST(req) {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const { sessionId } = await req.json();
+        const body = await req.json();
 
-        if (!sessionId) {
-            return new Response(JSON.stringify({ message: 'No sessionId provided' }), {
-                status: 400,
-            });
+        try {
+            await schema.validate(body, { abortEarly: false });
+        } catch (validationError) {
+            return new Response(JSON.stringify({
+                message: 'Validation failed',
+                errors: validationError.errors,
+            }), { status: 400 });
         }
+
+        const { sessionId } = body;
 
         const [sessionCheck] = await pool.query(
             'SELECT id FROM sessions WHERE id = ? AND user_id = ?',

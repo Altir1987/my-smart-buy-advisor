@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import styles from './auth.module.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { useUser } from "/app/context/UseContext";
+import { toast } from 'sonner';
+import styles from '@/app/login/auth.module.css';
+import { useUser } from '@/app/context/useContext';
+import { safeFetch } from '@/app/hooks/useSafeFetch';
 
 export default function AuthPage() {
     const [isLogin, setIsLogin] = useState(true);
@@ -18,70 +20,45 @@ export default function AuthPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!isLogin) {
+            if (!name.trim()) { toast.error('Enter your name'); return; }
+            if (!/^\S+@\S+\.\S+$/.test(email)) { toast.error('Enter a valid email address'); return; }
+            if (password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
+            if (password !== confirmPassword) { toast.error('Passwords do not match'); return; }
+        }
+
         if (isLogin) {
-            const res = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
-            const data = await res.json();
-
-            if (res.ok) {
-                setUser(data.user);
-                setRedirecting(true);
-                window.location.href = '/chat';
-            } else {
-                alert(data.message);
-            }
-            return;
-        }
-        if (!name.trim()) {
-            alert('Enter your name');
-            return;
-        }
-        if (!/^\S+@\S+\.\S+$/.test(email)) {
-            alert('Enter a valid email address');
-            return;
-        }
-        if (password.length < 6) {
-            alert('Password must be at least 6 characters');
-            return;
-        }
-        if (password !== confirmPassword) {
-            alert('Passwords do not match');
-            return;
-        }
-
-
-        try {
-            const res = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password }),
-            });
-            const data = await res.json();
-
-            if (res.ok) {
-                const loginRes = await fetch('/api/auth/login', {
+            try {
+                const data = await safeFetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password }),
                 });
-                const loginData = await loginRes.json();
-                if (loginRes.ok) {
-                    setUser(loginData.user);
-                    setRedirecting(true);
-                    window.location.href = '/chat';
-                } else {
-                    alert(loginData.message || 'Registration succeeded, but login failed.');
-                }
-            } else {
-                alert(data.message || 'Registration failed');
-            }
-        } catch (err) {
-            console.error(err);
-            alert('Something went wrong');
+                setUser(data.user);
+                setRedirecting(true);
+                window.location.href = '/chat';
+            } catch {}
+            return;
         }
+
+        try {
+            await safeFetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password }),
+            });
+            try {
+                const loginData = await safeFetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+                setUser(loginData.user);
+                setRedirecting(true);
+                window.location.href = '/chat';
+            } catch {}
+        } catch {}
     };
     return (
         <main className={styles.wrapper}>

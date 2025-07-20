@@ -1,16 +1,27 @@
 import pool from '@/db';
 import bcrypt from 'bcryptjs';
+import * as yup from 'yup';
+
+const registerSchema = yup.object().shape({
+    name: yup.string().min(2).required(),
+    email: yup.string().email().required(),
+    password: yup.string().min(6).required(),
+});
 
 export async function POST(req) {
     try {
         const body = await req.json();
-        const { name, email, password } = body;
 
-        if (!name || !email || !password) {
-            return new Response(JSON.stringify({ message: 'Missing fields' }), {
-                status: 400,
-            });
+        try {
+            await registerSchema.validate(body, { abortEarly: false });
+        } catch (validationError) {
+            return new Response(JSON.stringify({
+                message: 'Validation failed',
+                errors: validationError.errors,
+            }), { status: 400 });
         }
+
+        const { name, email, password } = body;
 
         const [rows] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
         if (rows.length > 0) {

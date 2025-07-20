@@ -1,9 +1,9 @@
 import { usePathname } from 'next/navigation';
-import styles from 'app/layouts/SideBarLayout.module.css';
-import { useUser } from '/app/context/UseContext';
-import {useIsMobile} from "@/app/hooks/useMobile";
-import DesktopSideBar from "@/components/desctopSideBar/DesktopSideBar";
-import MobileHeader from "@/components/mobileHeader/MobileHeader";
+import styles from '@/app/layouts/sideBarLayout.module.css';
+import {useUser} from '@/app/context/useContext';
+import {useIsMobile} from '@/app/hooks/useMobile';
+import DesktopSidebar from '@/components/desktopSidebar/DesktopSidebar';
+import MobileHeader from '@/components/mobileHeader/MobileHeader';
 
 export default function SidebarLayout({ children }) {
     const pathname = usePathname();
@@ -17,7 +17,7 @@ export default function SidebarLayout({ children }) {
 
     return (
         <div className={styles.wrapper}>
-            {!isMobile &&  <DesktopSideBar handleLogout={handleLogout} pathname={pathname} user={user}/> }
+            {!isMobile &&  <DesktopSidebar handleLogout={handleLogout} pathname={pathname} user={user}/> }
             {isMobile && <MobileHeader handleLogout={handleLogout} pathname={pathname} user={user} />}
             <main className={styles.main}>{children}</main>
         </div>

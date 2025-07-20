@@ -2,10 +2,25 @@ import pool from '@/db';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import cookie from 'cookie';
+import * as yup from 'yup';
 
+
+const loginSchema = yup.object().shape({
+    email: yup.string().email().required(),
+    password: yup.string().min(6).required(),
+});
 export async function POST(req) {
     try {
         const body = await req.json();
+        try {
+            await loginSchema.validate(body, { abortEarly: false });
+        } catch (validationError) {
+            return new Response(JSON.stringify({
+                message: 'Validation failed',
+                errors: validationError.errors,
+            }), { status: 400 });
+        }
+
         const { email, password } = body;
 
         const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
@@ -43,3 +58,4 @@ export async function POST(req) {
         });
     }
 }
+
