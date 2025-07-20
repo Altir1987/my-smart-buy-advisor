@@ -22,50 +22,54 @@ export function useChatSession(searchParams) {
                     ]);
                     setChat(data.messages || []);
                 } else {
-                    const [data] = await Promise.all([
-                        safeFetch('/api/start-session', { method: 'POST' }),
-                        minTime,
-                    ]);
-                    setSessionId(data.sessionId);
+                    setChat([]);
+                    setSessionId(null);
                 }
             } catch (err) {
                 setChat([]);
+                setSessionId(null);
             } finally {
                 setSkeletonLoading(false);
             }
         })();
-
         return () => {
-            if (!resumeSessionId && sessionId) {
-                safeFetch('/api/close-session', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sessionId }),
-                }).catch(() => {});
-            }
         };
     }, [searchParams]);
 
     const sendMessage = useCallback(async (input, chat, setInput, setLoading) => {
         if (!input.trim()) return toast.error('write something 😊');
+        setLoading(true);
+
+        let actualSessionId = sessionId;
+        if (!actualSessionId) {
+            try {
+                const data = await safeFetch('/api/start-session', { method: 'POST' });
+                actualSessionId = data.sessionId;
+                setSessionId(actualSessionId);
+            } catch {
+                setLoading(false);
+                toast.error('error while sending session');
+                return;
+            }
+        }
+
         const userMessage = { role: 'user', content: input };
         const newChat = [...chat, userMessage];
         setChat(newChat);
         setInput('');
-        setLoading(true);
 
         try {
             const cleanMessages = newChat.map(({ role, content }) => ({ role, content }));
             const data = await safeFetch('/api/ask-mistral', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: cleanMessages, sessionId }),
+                body: JSON.stringify({ messages: cleanMessages, sessionId: actualSessionId }),
             });
             const assistantMessage = data.choices?.[0]?.message;
             if (assistantMessage) setChat([...newChat, assistantMessage]);
         } catch {}
         setLoading(false);
-    }, [sessionId, setChat]);
+    }, [sessionId, setChat, setSessionId]);
 
     return { chat, setChat, skeletonLoading, sessionId, sendMessage };
 }
