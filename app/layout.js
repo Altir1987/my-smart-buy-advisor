@@ -4,7 +4,7 @@ import './globals.css';
 import { usePathname } from 'next/navigation';
 import { Toaster } from 'sonner';
 import { UserProvider } from '@/app/context/useContext';
-import {StoreProvider} from '@/app/context/storeContext'
+import {StoreProvider} from '@/app/context/context'
 import SidebarLayout from '@/app/layouts/SideBarLayouts';
 
 export default function RootLayout({ children }) {

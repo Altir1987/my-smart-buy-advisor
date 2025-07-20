@@ -75,7 +75,6 @@ export default function History() {
 
           <div ref={sentinelRef} />
           {loadingMore && <Skeleton />}
-          {!hasMore && !loading && <p className={styles.end}>end history</p>}
           {modalSession && (
               <div className={styles.modalBackdrop} onClick={() => setModalSession(null)}>
                  <div className={styles.modalWindow} onClick={e => e.stopPropagation()}>

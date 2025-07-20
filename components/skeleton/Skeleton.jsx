@@ -1,4 +1,4 @@
-import styles from 'components/skeleton/skeleton.module.css'
+import styles from '@/components/skeleton/skeleton.module.css'
 export default function Skeleton () {
     return (
         <div className={styles.skeletonWrapper}>

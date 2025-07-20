@@ -1,5 +1,5 @@
 
-import styles from './spinner.module.css'
+import styles from '@/components/spinner/spinner.module.css'
 
 export default function Spinner({message}) {
     return(

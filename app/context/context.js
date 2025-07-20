@@ -1,7 +1,7 @@
 'use client'
 import {createContext,useContext,useReducer} from 'react'
 
-const StoreContext = createContext()
+const Context = createContext()
 
 const initialState = {
 }
@@ -13,10 +13,10 @@ function reducer(state = initialState, action) {
 export function StoreProvider({children}) {
     const [state, dispatch] = useReducer(reducer, initialState);
     return (
-        <StoreContext.Provider value={[state, dispatch]}>{children}</StoreContext.Provider>
+        <Context.Provider value={[state, dispatch]}>{children}</Context.Provider>
     )
 };
 
 export function useStore() {
-    return useContext(StoreContext);
+    return useContext(Context);
 }
